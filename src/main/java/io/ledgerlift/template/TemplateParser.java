@@ -57,6 +57,7 @@ public final class TemplateParser {
             CsvReader reader = new CsvReader(new InputStreamReader(in, StandardCharsets.UTF_8));
             CsvReader.Record rec;
             int dataLine = 0;
+            int dropTrailing = 0;
             boolean first = true;
             while ((rec = reader.next()) != null) {
                 List<String> f = rec.fields();
@@ -64,12 +65,19 @@ public final class TemplateParser {
                     first = false;
                     if (!f.isEmpty()) f.set(0, stripBom(f.get(0)));
                     if (!f.isEmpty() && f.get(0).trim().equalsIgnoreCase(COLUMNS.get(0))) {
-                        continue; // header row
+                        // header row; an error-correction file carries one extra trailing ERRORS column
+                        if (f.size() == COLUMNS.size() + 1 && f.get(COLUMNS.size()).trim().equalsIgnoreCase("ERRORS")) {
+                            dropTrailing = 1;
+                        }
+                        continue;
                     }
                 }
                 String raw = rec.raw();
                 if (raw.isBlank() || raw.startsWith("#")) continue;
                 dataLine++;
+                if (dropTrailing > 0 && f.size() == COLUMNS.size() + dropTrailing) {
+                    f = new ArrayList<>(f.subList(0, COLUMNS.size()));
+                }
                 rows.add(parseRow(dataLine, f, raw, errors));
             }
         } catch (IOException e) {

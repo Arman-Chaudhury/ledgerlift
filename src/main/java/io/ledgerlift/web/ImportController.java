@@ -5,6 +5,8 @@ import io.ledgerlift.imports.ImportBatchRepository;
 import io.ledgerlift.imports.ImportError;
 import io.ledgerlift.imports.ImportService;
 import io.ledgerlift.template.ParsePolicy;
+import io.ledgerlift.validation.ErrorCorrectionFile;
+import io.ledgerlift.validation.ValidationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
@@ -27,10 +29,31 @@ public class ImportController {
 
     private final ImportService imports;
     private final ImportBatchRepository repo;
+    private final ValidationService validation;
+    private final ErrorCorrectionFile corrections;
 
-    public ImportController(ImportService imports, ImportBatchRepository repo) {
+    public ImportController(ImportService imports, ImportBatchRepository repo,
+                            ValidationService validation, ErrorCorrectionFile corrections) {
         this.imports = imports;
         this.repo = repo;
+        this.validation = validation;
+        this.corrections = corrections;
+    }
+
+    @Operation(summary = "Run the validation rule pack; batch becomes VALIDATED or REJECTED. Re-runnable.")
+    @PostMapping("/{id}/validate")
+    public ValidationService.ValidationSummary validate(@PathVariable long id) {
+        return validation.validate(id);
+    }
+
+    @Operation(summary = "Error-correction CSV: failing lines in template layout plus an ERRORS column; re-importable as-is.")
+    @GetMapping(value = "/{id}/errors.csv", produces = "text/csv")
+    public ResponseEntity<String> errorsCsv(@PathVariable long id) {
+        imports.get(id);
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"batch-" + id + "-errors.csv\"")
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(corrections.build(id));
     }
 
     @Operation(summary = "Upload a GL interface template (CSV or ZIP). Idempotent on file checksum.")
