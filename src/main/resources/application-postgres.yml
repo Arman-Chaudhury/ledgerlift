@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: ${LEDGERLIFT_DB_URL:jdbc:postgresql://localhost:5432/ledgerlift}
+    driver-class-name: org.postgresql.Driver
+    username: ${LEDGERLIFT_DB_USER:ledgerlift}
+    password: ${LEDGERLIFT_DB_PASSWORD:ledgerlift}
+  flyway:
+    locations: classpath:db/migration/common,classpath:db/migration/postgres
+
+ledgerlift:
+  posting:
+    engine: ${LEDGERLIFT_POSTING_ENGINE:procedure}

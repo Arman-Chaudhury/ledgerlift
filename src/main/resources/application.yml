@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: ledgerlift
+  datasource:
+    url: jdbc:h2:mem:ledgerlift;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  flyway:
+    locations: classpath:db/migration/common
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  thymeleaf:
+    cache: false
+
+ledgerlift:
+  api-key: ${LEDGERLIFT_API_KEY:dev-key}
+  posting:
+    engine: java   # java | procedure (procedure requires the postgres profile)
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
