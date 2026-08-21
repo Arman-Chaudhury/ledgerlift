@@ -36,6 +36,7 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - run: ./mvnw -B -ntp -DskipTests=false -Dsurefire.skip=true verify
+      # runs the whole unit suite against PostgreSQL, then the failsafe *IT equivalence tests
+      - run: ./mvnw -B -ntp verify
         env:
           SPRING_PROFILES_ACTIVE: postgres

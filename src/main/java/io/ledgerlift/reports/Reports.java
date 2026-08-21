@@ -68,15 +68,15 @@ public class Reports {
                     used.put("ledgerId", String.valueOf(ledger));
                     if (period != null && !period.isBlank()) used.put("period", period);
                     String sql = "select a.code as account_code, a.name as account_name, a.account_type,"
-                            + " coalesce(sum(jl.entered_dr),0) as debits, coalesce(sum(jl.entered_cr),0) as credits,"
-                            + " coalesce(sum(jl.entered_dr),0) - coalesce(sum(jl.entered_cr),0) as net, count(jl.id) as line_count"
+                            + " cast(coalesce(sum(jl.entered_dr),0) as numeric(20,2)) as debits, cast(coalesce(sum(jl.entered_cr),0) as numeric(20,2)) as credits,"
+                            + " cast(coalesce(sum(jl.entered_dr),0) - coalesce(sum(jl.entered_cr),0) as numeric(20,2)) as net, count(jl.id) as line_count"
                             + " from accounts a left join journal_lines jl on jl.account_id = a.id"
                             + " where a.ledger_id = ? group by a.code, a.name, a.account_type order by a.code";
                     if (period != null && !period.isBlank()) {
                         // period filter belongs inside the joined set, not the WHERE, so inactive accounts still appear
                         sql = "select a.code as account_code, a.name as account_name, a.account_type,"
-                                + " coalesce(sum(x.entered_dr),0) as debits, coalesce(sum(x.entered_cr),0) as credits,"
-                                + " coalesce(sum(x.entered_dr),0) - coalesce(sum(x.entered_cr),0) as net, count(x.id) as line_count"
+                                + " cast(coalesce(sum(x.entered_dr),0) as numeric(20,2)) as debits, cast(coalesce(sum(x.entered_cr),0) as numeric(20,2)) as credits,"
+                                + " cast(coalesce(sum(x.entered_dr),0) - coalesce(sum(x.entered_cr),0) as numeric(20,2)) as net, count(x.id) as line_count"
                                 + " from accounts a left join ("
                                 + "   select jl.* from journal_lines jl join journal_headers h on h.id = jl.header_id"
                                 + "   join periods pd on pd.id = h.period_id where pd.name = ?) x on x.account_id = a.id"
@@ -93,8 +93,8 @@ public class Reports {
                 params(), p -> table("batch-summary", "Import Batch Summary", Map.of(),
                         "select b.id as batch_id, b.source_name, b.status, b.row_count, b.parse_errors, b.error_count,"
                                 + " (select count(*) from journal_headers h where h.batch_id = b.id) as journals,"
-                                + " (select coalesce(sum(h.total_dr),0) from journal_headers h where h.batch_id = b.id) as posted_debits,"
-                                + " (select coalesce(sum(h.total_cr),0) from journal_headers h where h.batch_id = b.id) as posted_credits,"
+                                + " (select cast(coalesce(sum(h.total_dr),0) as numeric(20,2)) from journal_headers h where h.batch_id = b.id) as posted_debits,"
+                                + " (select cast(coalesce(sum(h.total_cr),0) as numeric(20,2)) from journal_headers h where h.batch_id = b.id) as posted_credits,"
                                 + " b.created_at, b.posted_at from import_batches b order by b.id"));
     }
 
