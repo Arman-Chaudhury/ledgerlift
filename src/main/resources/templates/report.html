@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="utf-8">
+  <title th:text="${report.title} + ' — ledgerlift'">Report</title>
+  <style>
+    body { font-family: -apple-system, Segoe UI, Helvetica, Arial, sans-serif; margin: 2rem; color: #1a1a1a; }
+    h1 { font-size: 1.4rem; margin-bottom: .25rem; }
+    .meta { color: #666; font-size: .85rem; margin-bottom: 1rem; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { border-bottom: 1px solid #ddd; padding: .4rem .6rem; text-align: left; white-space: nowrap; }
+    th { background: #f3f3f3; position: sticky; top: 0; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    tfoot td { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1 th:text="${report.title}">Report</h1>
+  <div class="meta">
+    <span th:text="'report: ' + ${report.name}"></span>
+    <span th:each="p : ${report.parameters}" th:text="' · ' + ${p.key} + '=' + ${p.value}"></span>
+    <span th:text="' · ' + ${#lists.size(report.rows)} + ' rows'"></span>
+  </div>
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th th:each="c : ${report.columns}" th:text="${c}">col</th></tr></thead>
+    <tbody>
+      <tr th:each="r : ${report.rows}">
+        <td th:each="v : ${r}" th:classappend="${v instanceof T(java.lang.Number)} ? 'num'"
+            th:text="${v instanceof T(java.math.BigDecimal)} ? ${#numbers.formatDecimal(v, 1, 'COMMA', 2, 'POINT')} : ${v}"></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package io.ledgerlift.web;
 
 import io.ledgerlift.imports.BatchNotFoundException;
+import io.ledgerlift.reports.ReportNotFoundException;
 import io.ledgerlift.template.TemplateException;
 import java.time.Instant;
 import java.util.Map;
@@ -14,8 +15,8 @@ public class ApiExceptionHandler {
 
     public record ApiError(int status, String error, String message, Instant timestamp) {}
 
-    @ExceptionHandler(BatchNotFoundException.class)
-    public ResponseEntity<ApiError> notFound(BatchNotFoundException e) {
+    @ExceptionHandler({BatchNotFoundException.class, ReportNotFoundException.class})
+    public ResponseEntity<ApiError> notFound(RuntimeException e) {
         return body(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
