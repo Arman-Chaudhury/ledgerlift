@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://ledgerlift.io/imports"
+           targetNamespace="http://ledgerlift.io/imports"
+           elementFormDefault="qualified">
+
+  <xs:complexType name="batch">
+    <xs:sequence>
+      <xs:element name="batchId" type="xs:long"/>
+      <xs:element name="sourceName" type="xs:string"/>
+      <xs:element name="status" type="xs:string"/>
+      <xs:element name="rowCount" type="xs:int"/>
+      <xs:element name="parseErrors" type="xs:int"/>
+      <xs:element name="errorCount" type="xs:int"/>
+      <xs:element name="postedAt" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="getImportStatusRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="batchId" type="xs:long"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="getImportStatusResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="batch" type="tns:batch"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="submitImportRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="fileName" type="xs:string"/>
+        <xs:element name="policy" type="xs:string" minOccurs="0"/>
+        <xs:element name="content" type="xs:base64Binary"/>
+        <xs:element name="validate" type="xs:boolean" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="submitImportResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="batch" type="tns:batch"/>
+        <xs:element name="duplicate" type="xs:boolean"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
