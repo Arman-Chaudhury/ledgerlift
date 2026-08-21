@@ -25,6 +25,7 @@ class PostingServiceTest {
     @Autowired ValidationService validation;
     @Autowired PostingService posting;
     @Autowired JdbcTemplate jdbc;
+    @org.springframework.beans.factory.annotation.Value("${ledgerlift.posting.engine}") String defaultEngine;
 
     static byte[] fixture(String name) throws IOException {
         return Files.readAllBytes(Path.of("src/test/resources/fixtures", name));
@@ -44,7 +45,7 @@ class PostingServiceTest {
         ImportBatch b = imports.upload(fixture("clean_journal.csv"), "clean.csv", ParsePolicy.STRICT).batch();
         validation.validate(b.id());
         var r = posting.post(b.id());
-        assertThat(r.engine()).isEqualTo("java");
+        assertThat(r.engine()).isEqualTo(defaultEngine); // java on H2, procedure under the postgres profile
         assertThat(r.journals()).isEqualTo(3);
         assertThat(r.lines()).isEqualTo(6);
         assertThat(r.batch().status()).isEqualTo(BatchStatus.POSTED);
