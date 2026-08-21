@@ -4,6 +4,7 @@ import io.ledgerlift.imports.ImportBatch;
 import io.ledgerlift.imports.ImportBatchRepository;
 import io.ledgerlift.imports.ImportError;
 import io.ledgerlift.imports.ImportService;
+import io.ledgerlift.posting.PostingService;
 import io.ledgerlift.template.ParsePolicy;
 import io.ledgerlift.validation.ErrorCorrectionFile;
 import io.ledgerlift.validation.ValidationService;
@@ -31,19 +32,28 @@ public class ImportController {
     private final ImportBatchRepository repo;
     private final ValidationService validation;
     private final ErrorCorrectionFile corrections;
+    private final PostingService posting;
 
     public ImportController(ImportService imports, ImportBatchRepository repo,
-                            ValidationService validation, ErrorCorrectionFile corrections) {
+                            ValidationService validation, ErrorCorrectionFile corrections, PostingService posting) {
         this.imports = imports;
         this.repo = repo;
         this.validation = validation;
         this.corrections = corrections;
+        this.posting = posting;
     }
 
     @Operation(summary = "Run the validation rule pack; batch becomes VALIDATED or REJECTED. Re-runnable.")
     @PostMapping("/{id}/validate")
     public ValidationService.ValidationSummary validate(@PathVariable long id) {
         return validation.validate(id);
+    }
+
+    @Operation(summary = "Post a VALIDATED batch to the ledger. engine=java|procedure (procedure needs PostgreSQL).")
+    @PostMapping("/{id}/post")
+    public PostingService.PostingResult post(@PathVariable long id,
+                                             @RequestParam(value = "engine", required = false) String engine) {
+        return engine == null ? posting.post(id) : posting.post(id, engine);
     }
 
     @Operation(summary = "Error-correction CSV: failing lines in template layout plus an ERRORS column; re-importable as-is.")

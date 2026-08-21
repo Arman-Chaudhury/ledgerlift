@@ -146,6 +146,15 @@ public class SqlRules {
                 }, batchId));
     }
 
+    @Bean @Order(65)
+    ValidationRule oneCurrencyPerJournal() {
+        return rule("MIXED_CURRENCY_JOURNAL", batchId -> jdbc.query(
+                "select journal_name, count(distinct currency_code) n from gl_interface where batch_id = ? and journal_name is not null"
+                        + " and currency_code is not null group by journal_name having count(distinct currency_code) > 1 order by journal_name",
+                (rs, i) -> Finding.batchError("MIXED_CURRENCY_JOURNAL",
+                        "journal '" + rs.getString("journal_name") + "' mixes " + rs.getInt("n") + " currencies; one journal, one currency"), batchId));
+    }
+
     @Bean @Order(70)
     ValidationRule duplicateLines() {
         return rule("DUPLICATE_LINE", batchId -> jdbc.query(

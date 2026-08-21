@@ -128,6 +128,15 @@ public class ImportBatchRepository {
                 status.name(), errorCount, ledgerId, Timestamp.from(Instant.now()), batchId);
     }
 
+    public int countJournals(long batchId) {
+        return jdbc.queryForObject("select count(*) from journal_headers where batch_id = ?", Integer.class, batchId);
+    }
+
+    public int countLines(long batchId) {
+        return jdbc.queryForObject("select count(*) from journal_lines jl join journal_headers h on h.id = jl.header_id where h.batch_id = ?",
+                Integer.class, batchId);
+    }
+
     public void markPosted(long batchId) {
         Timestamp now = Timestamp.from(Instant.now());
         jdbc.update("update import_batches set status = 'POSTED', posted_at = ?, updated_at = ? where id = ?", now, now, batchId);
