@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ledgerlift
+      POSTGRES_USER: ledgerlift
+      POSTGRES_PASSWORD: ledgerlift
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ledgerlift"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports: ["5432:5432"]
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      LEDGERLIFT_DB_URL: jdbc:postgresql://db:5432/ledgerlift
+      LEDGERLIFT_DB_USER: ledgerlift
+      LEDGERLIFT_DB_PASSWORD: ledgerlift
+      LEDGERLIFT_API_KEY: ${LEDGERLIFT_API_KEY:-dev-key}
+      LEDGERLIFT_POSTING_ENGINE: procedure
+    ports: ["8080:8080"]

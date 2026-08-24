@@ -1,0 +1,6 @@
+US Primary,Mar-26,J1,ok line,1000,USD,100.00,,2026-03-02,R1
+US Primary,Mar-26,J1,bad amount,1000,USD,abc,,2026-03-02,R1
+US Primary,Mar-26,J1,bad date,1000,USD,,100.00,31/03/2026,R1
+US Primary,Mar-26,J1,too few columns,1000,USD,5.00
+US Primary,Mar-26,J1,three decimals,1000,USD,1.005,,2026-03-02,R1
+US Primary,Mar-26,J1,bad currency,1000,DOLLARS,,1.00,03/02/2026,R1

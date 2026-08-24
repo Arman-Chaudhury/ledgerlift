@@ -1,0 +1,42 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - run: ./mvnw -B -ntp test
+
+  postgres-it:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ledgerlift
+          POSTGRES_USER: ledgerlift
+          POSTGRES_PASSWORD: ledgerlift
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U ledgerlift" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      # runs the whole unit suite against PostgreSQL, then the failsafe *IT equivalence tests
+      - run: ./mvnw -B -ntp verify
+        env:
+          SPRING_PROFILES_ACTIVE: postgres
