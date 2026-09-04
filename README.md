@@ -2,22 +2,29 @@
 
 [![ci](https://github.com/Arman-Chaudhury/ledgerlift/actions/workflows/ci.yml/badge.svg)](https://github.com/Arman-Chaudhury/ledgerlift/actions/workflows/ci.yml)
 
-FBDI-style bulk data migration and integration service for General Ledger
-journals, in Java 17 / Spring Boot. Modelled on the Oracle Fusion
-`GL_INTERFACE` flow: a CSV (or ZIP) template is staged into an interface
-table, validated by a set-based SQL rule pack, returned as an error-correction
-file when it fails, and posted to the ledger in one transaction when it
-passes — then reported on through a data-model/layout split in the style of
-BI Publisher. Exposed over REST (OpenAPI) and SOAP (WSDL).
+When a company moves its accounting to a new system, thousands of financial
+journal entries have to be carried over, and every one has to balance. Big
+accounting software like Oracle does this with a specific routine: you upload a
+spreadsheet template, the system checks every line, hands back a file of what
+is wrong so you can fix it and re-upload, and only then posts everything to the
+books in one go.
+
+ledgerlift is my implementation of that routine, written in Java with Spring
+Boot. Upload a CSV or ZIP, it stages the rows, runs fourteen validation checks,
+returns a fixable errors file if anything fails, and posts the batch as a
+single transaction if everything passes. Then it produces the standard reports
+(trial balance, batch summaries, account activity) as JSON, CSV, or HTML.
+Other systems can talk to it over both the modern interface (REST) and the
+older enterprise one (SOAP), because real accounting shops still use both.
 
 ```
 template CSV/ZIP ──> gl_interface (staging) ──> 14 validation rule codes ──> errors.csv (re-importable)
                                              └──> journal_headers / journal_lines ──> reports (json | csv | html)
 ```
 
-Posting is implemented twice on purpose — a portable JDBC path and a
-PL/pgSQL stored procedure — and CI proves on a real PostgreSQL that the two
-leave the ledger byte-for-byte identical.
+The posting step is written twice on purpose, once in Java and once as a
+stored procedure inside the database itself, and the test suite proves on a
+real PostgreSQL that both leave the ledger exactly identical.
 
 ## Quick start
 
